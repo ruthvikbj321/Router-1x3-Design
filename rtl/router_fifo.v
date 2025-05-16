@@ -48,11 +48,14 @@ module router_fifo(clock, resetn, write_enb, soft_reset, read_enb, data_in, lfd_
 				counter <= 0;
 			else if(read_enb && !empty )
 				begin
-					if(fifo[read_ptr][8] == 1)
-						counter <= fifo[read_ptr][7:2] + 1;
+					if(fifo[read_ptr[3:0]][8] == 1)					// header byte check by checking 9th bit of fifo i.e lfd_state_temp
+						counter <= fifo[read_ptr[3:0]][7:2] + 1;
+						
 					else if(counter != 0)
 						counter <= counter - 1'b1;
 				end
+			else
+				counter	<= counter;
 		end
 	
 	//----------------------------------------fifo write logic-----------------------------------------
@@ -61,10 +64,11 @@ module router_fifo(clock, resetn, write_enb, soft_reset, read_enb, data_in, lfd_
 		begin
 			if(!resetn || soft_reset) begin
 				for(i=0; i<16; i=i+1)
-					fifo[i] <= 0;
+					fifo[i] <= 9'b0;
 			end	
-			else if(write_enb && !full)
-				fifo[write_ptr[3:0]] <= {lfd_state_temp,data_in};
+			else if(write_enb && !full) 
+			
+				{fifo[write_ptr[3:0]][8], fifo[write_ptr[3:0]][7:0] } <= {lfd_state_temp,data_in};
 		end
 		
 	//----------------------------------------fifo read logic-----------------------------------------
@@ -75,13 +79,13 @@ module router_fifo(clock, resetn, write_enb, soft_reset, read_enb, data_in, lfd_
 				data_out <= 0;
 			else if(soft_reset)
 				data_out <= 8'bz;	
-			else 
-				begin
-					if(read_enb && !empty)
-						data_out <= fifo[read_ptr[3:0]];
-					else if (counter == 0 )		// completely read
-						data_out <= 8'bz;
-				end
+				
+			else if(read_enb && !empty)
+				data_out <= fifo[read_ptr[3:0]][7:0];
+				
+			else if (counter == 0 )		// completely read
+					data_out <= 8'bz;
+				
 		end
 	
 	//------------------

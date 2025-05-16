@@ -52,9 +52,10 @@ module synchronizer(input detect_add, write_enb_reg, clock, resetn, read_enb_0, 
 		if(!resetn)
 			count0 <= 5'd0;
 			
+			
 		else if(vld_out_0) begin
 				if(!read_enb_0) begin
-					if(count0 == 5'b11110) begin
+					if(count0 == 5'b11101) begin
 						soft_reset_0 <= 1;
 						count0 <= 5'b0;
 					end
@@ -63,11 +64,15 @@ module synchronizer(input detect_add, write_enb_reg, clock, resetn, read_enb_0, 
 						count0 <= count0 + 1;
 					end
 				end
-				else
+				else begin
 					count0 <= 5'd0;
+					soft_reset_0 <= 1'b0;
 				end
-		else
+				end
+		else begin
 			count0 <= 5'd0;
+			soft_reset_0 <= 1'b0;
+		end
 		
 	end
 	
@@ -79,7 +84,7 @@ module synchronizer(input detect_add, write_enb_reg, clock, resetn, read_enb_0, 
 			
 		else if(vld_out_1) begin
 				if(!read_enb_1) begin
-					if(count1 == 5'b11110) begin
+					if(count1 == 5'b11101) begin
 						soft_reset_1 <= 1;
 						count1 <= 5'b0;
 					end
@@ -88,11 +93,15 @@ module synchronizer(input detect_add, write_enb_reg, clock, resetn, read_enb_0, 
 						count1<= count1 + 1;
 					end
 				end
-				else
+				else begin
 					count1 <= 5'd0;
+					soft_reset_1 <= 1'b0;
 				end
-		else
+				end
+		else begin
 			count1 <= 5'd0;
+			soft_reset_1 <= 1'b0;
+		end
 	end
 	
 	always@(posedge clock) begin
@@ -102,7 +111,7 @@ module synchronizer(input detect_add, write_enb_reg, clock, resetn, read_enb_0, 
 			
 		else if(vld_out_2) begin
 				if(!read_enb_2) begin
-					if(count2 == 5'b11110) begin
+					if(count2 == 5'b11101) begin
 						soft_reset_2 <= 1;
 						count2 <= 5'b0;
 					end
@@ -111,11 +120,15 @@ module synchronizer(input detect_add, write_enb_reg, clock, resetn, read_enb_0, 
 						count2 <= count2 + 1;
 					end
 				end
-				else
+				else begin
 					count2 <= 5'd0;
+					soft_reset_2 <= 1'b0;
 				end
-			else
-					count2 <= 5'd0;	
+				end
+			else begin
+				count2 <= 5'd0;
+				soft_reset_2 <= 1'b0;
+			end
 	end
 	
 	//-----------------------------------valid out---------------------------------

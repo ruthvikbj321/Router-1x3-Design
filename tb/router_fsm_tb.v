@@ -149,6 +149,21 @@ module router_fsm_tb();
 	end
 	endtask
 	
+	task t5; begin
+		pkt_valid = 1;
+		data_in = 2'b01;
+		fifo_empty_1 = 0;
+		
+		@(negedge clock);
+		@(negedge clock);
+		
+		fifo_empty_1 = 1;
+		data_in = 2'b01;
+		@(negedge clock);
+		
+		end
+	endtask
+	
 	task initialize;
 		begin
 			{clock,pkt_valid,data_in,soft_reset_0,soft_reset_1,soft_reset_2,
@@ -165,7 +180,7 @@ module router_fsm_tb();
 			t1;
 			reset_all;
 			#100;
-			t2;
+			t4;
 			reset_all;
 			#100;
 			reset_all;

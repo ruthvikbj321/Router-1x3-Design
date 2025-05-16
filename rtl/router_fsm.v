@@ -14,14 +14,14 @@ module router_fsm(input clock, resetn,
 				  
 	reg [2:0] present_state, next_state;
 	
-	parameter DECODE_ADDRESS  = 3'b000,
-			  LOAD_FIRST_DATA = 3'b001,
-			  LOAD_DATA		  = 3'b010,
-			  FIFO_FULL_STATE = 3'b011,
-			  LOAD_AFTER_FULL = 3'b100,
-			  LOAD_PARITY	  = 3'b101,
+	parameter DECODE_ADDRESS 	 = 3'b000,
+			  LOAD_FIRST_DATA	 = 3'b001,
+			  LOAD_DATA		 	 = 3'b010,
+			  FIFO_FULL_STATE	 = 3'b011,
+			  LOAD_AFTER_FULL	 = 3'b100,
+			  LOAD_PARITY	 	 = 3'b101,
 			  CHECK_PARITY_ERROR = 3'b110,
-			  WAIT_TILL_EMPRY = 3'b111;
+			  WAIT_TILL_EMPRY 	 = 3'b111;
 	
 	// present_state logic	
 	always@(posedge clock) begin
@@ -97,7 +97,7 @@ module router_fsm(input clock, resetn,
 		
 		WAIT_TILL_EMPRY: begin
 					if((fifo_empty_0 && data_in[1:0] == 2'b00)||(fifo_empty_1 && data_in[1:0] == 2'b01)||(fifo_empty_2 && data_in[1:0] == 2'b10))
-						next_state = LOAD_DATA;
+						next_state = LOAD_FIRST_DATA;
 					else
 						next_state = present_state;
 		end
@@ -106,13 +106,13 @@ module router_fsm(input clock, resetn,
 		endcase
 	end
 	
-	assign detect_add	= (present_state == DECODE_ADDRESS) ? 1'b1: 1'b0;
-	assign busy			= (present_state == DECODE_ADDRESS || present_state == LOAD_DATA) ? 1'b1: 1'b0;
-	assign ld_state		= (present_state == LOAD_DATA) ? 1'b1: 1'b0;
-	assign laf_state	= (present_state == LOAD_AFTER_FULL) ? 1'b1: 1'b0;
-	assign lfd_state	= (present_state == LOAD_FIRST_DATA) ? 1'b1: 1'b0;
-	assign full_state	= (present_state == FIFO_FULL_STATE) ? 1'b1: 1'b0;
+	assign detect_add	= (present_state == DECODE_ADDRESS)  								? 1'b1: 1'b0;
+	assign busy			= (present_state == DECODE_ADDRESS || present_state == LOAD_DATA)	? 1'b0: 1'b1;
+	assign ld_state		= (present_state == LOAD_DATA) 		 								? 1'b1: 1'b0;
+	assign laf_state	= (present_state == LOAD_AFTER_FULL) 								? 1'b1: 1'b0;
+	assign lfd_state	= (present_state == LOAD_FIRST_DATA) 								? 1'b1: 1'b0;
+	assign full_state	= (present_state == FIFO_FULL_STATE) 								? 1'b1: 1'b0;
 	assign write_enb_reg = ((present_state == LOAD_DATA) || (present_state == LOAD_AFTER_FULL)||(present_state == LOAD_PARITY)) ? 1'b1: 1'b0;
-	assign rst_int_reg	= (present_state == CHECK_PARITY_ERROR) ? 1'b1: 1'b0;
+	assign rst_int_reg	= (present_state == CHECK_PARITY_ERROR) 							? 1'b1: 1'b0;
 	
 endmodule

@@ -1,4 +1,5 @@
 
+
 `timescale 1ns/1ps
 module router_sync_tb();
 	
@@ -41,7 +42,7 @@ module router_sync_tb();
 	task reset;
 		begin
 			resetn = 0;
-			#40
+			#20
 			resetn = 1;
 		end
 	endtask
@@ -65,17 +66,17 @@ module router_sync_tb();
 			full_0 = 0;
 			full_1 = 0;
 			full_2 = 0;
-			empty_0 = 0;
-			empty_1 = 0;
-			empty_2 = 0;
+			empty_0 = 1;
+			empty_1 = 1;
+			empty_2 = 1;
 			write_enb_reg = 0;
-			read_enb_0 = 0;
-			read_enb_1 = 0;
-			read_enb_2 = 0;
+			read_enb_0 = 1;
+			read_enb_1 = 1;
+			read_enb_2 = 1;
 		end
 	endtask
 	
-	task wrt_en;
+	task write_enable;
 		begin
 			@(posedge clock)
 			write_enb_reg = 1;
@@ -103,23 +104,7 @@ module router_sync_tb();
 		end
 	endtask */
 	
-	task test_soft_reset(input [1:0] addr);
-	  begin
-	 
-		send_address(addr); wrt_en;
-		@(posedge clock);
-		case(addr)
-		  2'b00: begin empty_0 = 0; read_enb_0 = 0; full_0 = 1; end
-		  2'b01: begin empty_1 = 0; read_enb_1 = 1; full_1 = 0;end
-		  2'b10: begin empty_2 = 1; read_enb_2 = 0; full_2 = 0; end
-		endcase
-		repeat(30) @(posedge clock);
-		
-	  end
-	endtask
-
 	
-	reg [1:0]temp_addr;
 	initial begin
 		$display("Starting testbench");
 		$monitor(" Time = %0t | soft_reset_0 = %b | soft_reset_1 = %b | soft_reset_2 = %b",
@@ -127,23 +112,51 @@ module router_sync_tb();
 					
 		initialize();
 		reset;
+
+		send_address(2'b00); write_enable;
+		send_address(2'b01); write_enable;
+		send_address(2'b10); write_enable;
 		
-		temp_addr = 2'b00;	
-		test_soft_reset(temp_addr);
+		@(posedge clock)
+		    empty_0 	= 0;   // vld_out_0 = 1
+			read_enb_0 	= 0;
 		
-		#10;
-		reset; #10;
+		 repeat(29) @(posedge clock);
 		
-		temp_addr = 2'b01;
-		test_soft_reset(temp_addr);
+		@(posedge clock)
+			read_enb_0 = 1; // stop soft reset
+		@(posedge clock)
+			empty_0 = 1;
+		
+		//fifo 1
+		
+		@(posedge clock);
+			empty_1 = 0;
+			read_enb_1 = 0;
+		
+		repeat(30) @(posedge clock);
+		
+		@(posedge clock);
+			read_enb_1 = 1;  // Stop soft reset trigger
+		@(posedge clock);
+			empty_1 = 1;
 				
-		#10;
 		
-		temp_addr = 2'b10;
-		test_soft_reset(temp_addr);
+		// fifo 2
 		
-			
-		#2000;
+		@(posedge clock);
+			empty_2 = 0;
+			read_enb_2 = 0;
+		
+		repeat(30) @(posedge clock);
+		
+		@(posedge clock);
+			read_enb_2 = 1;  // Stop soft reset trigger
+		@(posedge clock);
+			empty_2 = 1;
+		
+	
+		#200;
 		$finish;
 	end
 endmodule

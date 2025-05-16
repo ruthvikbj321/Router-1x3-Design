@@ -1,11 +1,10 @@
-
-`timescale 1ns/1ps
-
 module router_fifo_tb();
 	reg clock, resetn, write_enb, soft_reset, read_enb, lfd_state;
 	reg [7:0] data_in;
+	
 	wire full, empty;
 	wire [7:0] data_out;
+	integer i;
 	
 	router_fifo DUT(.clock(clock),
 					.resetn(resetn),
@@ -15,6 +14,7 @@ module router_fifo_tb();
 					.data_in(data_in),
 					.full(full),
 					.empty(empty),
+					
 					.data_out(data_out),	
 					.lfd_state(lfd_state)
 					);
@@ -24,31 +24,55 @@ module router_fifo_tb();
 	always #5 clock = ~clock;
 	
 	//
-	task reset_all;
+	task initialize;
 		begin
-			resetn = 0; soft_reset = 0; write_enb =0; 
-			read_enb = 0; data_in = 0; lfd_state = 0;
-			#20 resetn = 1;
+			resetn = 0; 
+			soft_reset = 0; 
+			write_enb =0; 
+			read_enb = 0; 
+			data_in = 0; 
+			lfd_state = 0;
 		end
 	endtask
 	
-	task write_byte(input [7:0]data, input is_header);
-		begin
+	task reset_all; begin
 		@(posedge clock)
-			write_enb = 1; lfd_state = is_header; data_in = data;
+		resetn = 1'b0;
 		@(posedge clock)
-			write_enb = 0; data_in = 0;
-		end
+		resetn = 1'b1;
+	end
 	endtask
 	
-	task read_byte;
+	task write_byte(input [5:0]len, input [1:0]address);
+		reg [7:0] payload_data, parity, header;
+		reg [5:0] payload_len;
+		reg [1:0] addr;
 		begin
 		@(posedge clock)
-			read_enb = 1;
-		@(posedge clock)
-			read_enb = 0;
-		end
+			payload_len	= len;
+			addr		= address;
+			header		= {payload_len,addr};
+			data_in		= header;
+			parity		= 0^header;
+			lfd_state	= 1'b1;
+			write_enb	= 1'b1;
+			read_enb	= 1'b0;
+			for(i=0; i < payload_len; i=i+1)
+				begin
+					@(posedge clock)
+					lfd_state 		= 1'b0;
+					payload_data 	= {$random}%256;
+					parity			= parity^payload_data;
+					data_in			= payload_data;
+				end
+			@(posedge clock)
+				data_in		= parity;
+			@(posedge clock)
+				write_enb	= 1'b0;
+		end		
+		
 	endtask
+
 		
 	task apply_soft_reset;
 		begin
@@ -57,29 +81,41 @@ module router_fifo_tb();
 		@(posedge clock);
 			soft_reset = 0;
 		end
-  endtask
+	endtask
+	
+	task read_byte;
+		begin
+		  @(posedge clock)
+			read_enb = 1'b1;
+		  while (!empty) begin
+			@(posedge clock);
+		  end
+		  read_enb = 1'b0;
+		end
+	endtask
   
     initial begin
     $display("Starting testbench");
-	 $monitor("Time: %0t | lfd_state=%b | data_in=%h | data_out=%h | full=%b | empty=%b | counter=%d", 
-         $time, lfd_state, data_in, data_out, full, empty, DUT.counter);
-
+	$monitor("Time=%0t, Data Out: %h", $time, data_out);
+	
+	initialize;
     reset_all;
 
-    write_byte(8'b00001100, 1);  
+    write_byte(6'd12, 2'b01); 
+	read_byte;
+	
+	reset_all;
+	
+	
 
-    write_byte(8'hA1, 0);
-    write_byte(8'hB2, 0);
-    write_byte(8'hC3, 0);
+    write_byte(6'd5, 2'b01);
+	apply_soft_reset;
+	
+    write_byte(6'd7, 2'b00);
+	read_byte;
     
-    repeat (4) read_byte;
  
-    write_byte(8'b00000100, 1);  //header with small payload
-    apply_soft_reset;
-	 
-	 
-	 #100;
-
+	#100
     $finish;
   end
 
