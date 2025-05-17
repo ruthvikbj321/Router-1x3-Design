@@ -1,0 +1,30 @@
+ 
+****************************************
+Report : area
+Design : router_top
+Version: T-2022.03-SP4
+Date   : Sat May 17 22:19:03 2025
+****************************************
+
+Library(s) Used:
+
+    lsi_10k (File: /home1/BRN49/RuthvikBJ/VLSI_RN/Verilog_labs/Router1X3/lib/lsi_10k.db)
+
+Number of ports:                          191
+Number of nets:                          2374
+Number of cells:                         2117
+Number of combinational cells:           1508
+Number of sequential cells:               603
+Number of macros/black boxes:               0
+Number of buf/inv:                        179
+Number of references:                       6
+
+Combinational area:               2846.000000
+Buf/Inv area:                      179.000000
+Noncombinational area:            4125.000000
+Macro/Black Box area:                0.000000
+Net Interconnect area:      undefined  (No wire load specified)
+
+Total cell area:                  6971.000000
+Total area:                 undefined
+1

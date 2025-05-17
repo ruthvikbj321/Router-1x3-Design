@@ -1,0 +1,12 @@
+ 
+****************************************
+Report : constraint
+        -all_violators
+Design : router_top
+Version: T-2022.03-SP4
+Date   : Sat May 17 22:19:03 2025
+****************************************
+
+This design has no violated constraints.
+
+1

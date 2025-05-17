@@ -1,0 +1,40 @@
+Information: Updating design information... (UID-85)
+ 
+****************************************
+Report : timing
+        -path full
+        -delay max
+        -max_paths 1
+Design : router_top
+Version: T-2022.03-SP4
+Date   : Sat May 17 22:19:03 2025
+****************************************
+
+Operating Conditions: nom_pvt   Library: lsi_10k
+Wire Load Model Mode: top
+
+  Startpoint: fifo[0].f1/read_ptr_reg[3]
+              (rising edge-triggered flip-flop)
+  Endpoint: valid_out_0
+            (output port)
+  Path Group: (none)
+  Path Type: max
+
+  Point                                    Incr       Path
+  -----------------------------------------------------------
+  fifo[0].f1/read_ptr_reg[3]/CP (FD1)      0.00       0.00 r
+  fifo[0].f1/read_ptr_reg[3]/QN (FD1)      2.25       2.25 f
+  fifo[0].f1/U4/Z (AO2)                    1.08       3.33 r
+  fifo[0].f1/U8/Z (ND4)                    0.73       4.06 f
+  fifo[0].f1/U11/Z (NR2)                   2.10       6.17 r
+  fifo[0].f1/empty (router_fifo_2)         0.00       6.17 r
+  sy/empty_0 (synchronizer)                0.00       6.17 r
+  sy/U10/Z (IVP)                           0.19       6.36 f
+  sy/vld_out_0 (synchronizer)              0.00       6.36 f
+  valid_out_0 (out)                        0.00       6.36 f
+  data arrival time                                   6.36
+  -----------------------------------------------------------
+  (Path is unconstrained)
+
+
+1
